@@ -4,11 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       openwrt_board:
-        description: "1、请选择设备型号"
-        required: true
-        default: "s905d_s905x3_s912_s922x-ct2000"
+        description: "Select device board"
+        required: false
+        default: "all"
         type: choice
         options:
+          - all
+          - first50
+          - range50_100
+          - range100_150
+          - last20
           - a311d-oes_s922x-oes-plus_wxy-oect
           - nsy-g16-plus_nsy-g68-plus_bdy-g18-pro
           - s905d_s905x3_s912_s922x-ct2000
@@ -17,6 +22,9 @@ on:
           - alark35-3500
           - anas3035
           - aio-3399b
+          - aio-3399c
+          - aio-3399c-ai
+          - bdkj-bd-one
           - bdy-g18-pro
           - beikeyun
           - chainedbox
@@ -31,6 +39,7 @@ on:
           - eaidk-610
           - emb3531
           - fine3399
+          - firefly-jd4
           - firefly-rk3399
           - fmx1-pro
           - fmx1-pro-b
@@ -51,11 +60,12 @@ on:
           - lckfb-tspi
           - leez
           - lx-r3s
+          - lz-d3568
           - lz-k3568
           - mrkaio-m68s
+          - nanopc-t4
           - nanopc-t6
           - nanopi-m5
-          - nanopi-r3s
           - nanopi-r5c
           - nanopi-r5s
           - nsy-g16-plus
@@ -70,6 +80,7 @@ on:
           - r68s
           - renegade-rk3328
           - rk3318-box
+          - rock-5-itx
           - rock5b
           - rock5c
           - ruisen-box
@@ -163,6 +174,7 @@ on:
           - smart-am60
           - station-m1
           - station-m2
+          - station-p2
           - sv-33a6x
           - swan1-w28
           - sw799
@@ -183,22 +195,56 @@ on:
           - zk-r39a
           - zysj
       openwrt_kernel:
-        description: "2、请选择内核版本"
-        required: true
-        default: "6.6.y"
+        description: "Select kernel version"
+        required: false
+        default: "6.12.y_6.18.y"
         type: choice
         options:
+          - 5.10.y
           - 5.15.y
           - 6.1.y
           - 6.6.y
           - 6.12.y
-          - 6.6.115
-          - 6.12.47
+          - 6.18.y
+          - 5.10.y_5.15.y
+          - 6.1.y_6.6.y
+          - 6.12.y_6.18.y
+          - 6.1.y_6.12.y
+          - 6.1.y_6.18.y
       auto_kernel:
-        description: "自动使用最新内核-未匹配则自动"
+        description: "Auto use the latest kernel"
         required: false
         default: true
         type: boolean
+      kernel_repo:
+        description: "Set the kernel repository"
+        required: false
+        default: "ophub/kernel"
+        type: choice
+        options:
+          - ophub/kernel
+      kernel_usage:
+        description: "Set the tags of the stable kernel."
+        required: false
+        default: "stable"
+        type: choice
+        options:
+          - stable
+          - flippy
+          - beta
+      openwrt_ip:
+        description: "Set OpenWrt default IP address."
+        required: false
+        default: "192.168.1.1"
+      builder_name:
+        description: "Set OpenWrt builder signature."
+        required: false
+        default: "ophub"
+        type: choice
+        options:
+          - ophub
+          - angel
+          - yourname
       openwrt_rootfs:
         description: "3、请选择Rootfs通用底包（先确保St1有执行）"
         required: true
@@ -246,13 +292,14 @@ jobs:
       - name: 🧱 打包iStoreOS固件
         uses: ophub/amlogic-s9xxx-openwrt@main
         with:
-          openwrt_path: ${{ steps.find_rootfs.outputs.file }}
+          openwrt_path: ${{ steps.prepare_rootfs.outputs.rootfs_path }}
+          openwrt_ip: ${{ inputs.openwrt_ip }}
           openwrt_board: ${{ inputs.openwrt_board }}
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
           auto_kernel: ${{ inputs.auto_kernel }}
-          kernel_repo: ophub/kernel
-          kernel_usage: stable
-          builder_name: kwonelee
+          kernel_repo: ${{ inputs.kernel_repo }}
+          kernel_usage: ${{ inputs.kernel_usage }}
+          builder_name: ${{ inputs.builder_name }}
 
       - name: 📜 调整.img.gz 文件名
         id: rename

@@ -292,7 +292,7 @@ jobs:
       - name: 🧱 打包iStoreOS固件
         uses: ophub/amlogic-s9xxx-openwrt@main
         with:
-          openwrt_path: ${{ steps.prepare_rootfs.outputs.rootfs_path }}
+          openwrt_path: ${{ steps.find_rootfs.outputs.file }}
           openwrt_ip: ${{ inputs.openwrt_ip }}
           openwrt_board: ${{ inputs.openwrt_board }}
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
